@@ -156,8 +156,23 @@ def add_positional_encoding_to_embeddings(embedded_batch, positional_encoding):
 
     return embedded_batch + positional_encoding[:L, :]
 
-# Step 14 - build_padding_mask (not yet solved)
-# TODO: implement
+# Step 14 - build_padding_mask
+import torch
+
+def build_padding_mask(token_ids, pad_id):
+    """Return a (B, 1, 1, L) bool mask: True where token_ids != pad_id."""
+    B, L = token_ids.shape
+    mask = torch.zeros((B, 1, 1, L), dtype=torch.bool)
+    
+    for b in range(B):
+        for l in range(L):
+            if token_ids[b][l]!=pad_id:
+                mask[b][0][0][l] = True
+
+            else:
+                mask[b][0][0][l] = False
+
+    return mask
 
 # Step 15 - build_causal_mask (not yet solved)
 # TODO: implement
