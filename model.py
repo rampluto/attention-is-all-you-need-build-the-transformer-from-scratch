@@ -204,8 +204,18 @@ def mask_attention_scores_with_neg_inf(scores, mask):
     """Set entries of scores where mask is False to -inf."""
     return scores.masked_fill(~mask.bool(), float('-inf'))
 
-# Step 20 - softmax_attention_weights (not yet solved)
-# TODO: implement
+# Step 20 - softmax_attention_weights
+import torch
+
+def softmax_attention_weights(masked_scores):
+    """Compute attention weights, safely handling fully masked rows."""
+
+    weights = torch.softmax(masked_scores, dim=-1)
+
+    # Replace NaN values from fully masked rows with zero
+    weights = torch.nan_to_num(weights, nan=0.0)
+
+    return weights
 
 # Step 21 - apply_attention_weights_to_values (not yet solved)
 # TODO: implement
