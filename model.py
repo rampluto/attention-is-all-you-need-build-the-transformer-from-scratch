@@ -413,8 +413,13 @@ def assemble_encoder_layer(x, layer_params, num_heads, src_mask):
     attn_sublayer_output = encoder_layer_self_attention_sublayer(x, layer_params['w_q'], layer_params['w_k'], layer_params['w_v'], layer_params['w_o'], layer_params['attn_gamma'], layer_params['attn_beta'], num_heads, src_mask)
     return encoder_layer_feed_forward_sublayer(attn_sublayer_output, layer_params['w1'], layer_params['b1'], layer_params['w2'], layer_params['b2'], layer_params['ffn_gamma'], layer_params['ffn_beta'])
 
-# Step 42 - stack_encoder_layers (not yet solved)
-# TODO: implement
+# Step 42 - stack_encoder_layers
+def stack_encoder_layers(x, encoder_layer_params_list, num_heads, src_mask):
+    # TODO: sequentially apply each encoder layer to the running hidden state and return the final tensor.
+    for layer_params in encoder_layer_params_list:
+        x = assemble_encoder_layer(x, layer_params, num_heads, src_mask)
+
+    return x
 
 # Step 43 - decoder_layer_masked_self_attention_sublayer (not yet solved)
 # TODO: implement
