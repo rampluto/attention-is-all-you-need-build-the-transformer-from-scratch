@@ -518,8 +518,59 @@ import torch
 def apply_log_softmax_over_vocab(logits):
     return torch.log_softmax(logits, dim=-1)
 
-# Step 51 - run_transformer_forward (not yet solved)
-# TODO: implement
+# Step 51 - run_transformer_forward
+import torch
+
+def run_transformer_forward(src_ids, tgt_ids, model_params, num_heads, pad_id):
+    p = model_params
+    d_model = p["src_embedding"].shape[-1]
+
+    # 1. Token embedding lookup
+    x = p["src_embedding"][src_ids]
+    y = p["tgt_embedding"][tgt_ids]
+
+    # 2. Scale embeddings
+    x = scale_embeddings_by_sqrt_d_model(x, d_model)
+    y = scale_embeddings_by_sqrt_d_model(y, d_model)
+
+    # 3. Build sinusoidal positional encoding
+    max_len = max(src_ids.size(1), tgt_ids.size(1))
+    pe = build_sinusoidal_positional_encoding(max_len, d_model)
+
+    # 4. Add positional encoding
+    x = add_positional_encoding_to_embeddings(x, pe.to(x))
+    y = add_positional_encoding_to_embeddings(y, pe.to(y))
+
+    # 5. Build source padding mask
+    src_mask = build_padding_mask(src_ids, pad_id)
+
+    # 6. Build combined target mask
+    tgt_padding_mask = build_padding_mask(tgt_ids, pad_id)
+    tgt_causal_mask = build_causal_mask(tgt_ids.size(1))
+    tgt_causal_mask = tgt_causal_mask.to(tgt_ids.device)
+
+    tgt_mask = combine_padding_and_causal_masks(
+        tgt_padding_mask, tgt_causal_mask
+    )
+
+    # 7. Run encoder stack
+    encoder_output = stack_encoder_layers(
+        x, p["encoder_layers"], num_heads, src_mask
+    )
+
+    # 8. Run decoder stack
+    decoder_output = stack_decoder_layers(
+        y, encoder_output, p["decoder_layers"],
+        num_heads, src_mask, tgt_mask
+    )
+
+    # 9. Project decoder output to vocabulary logits
+    logits = apply_final_output_projection(
+        decoder_output, p["output_projection"]
+    )
+
+    # 10. Convert logits to log probabilities
+    return apply_log_softmax_over_vocab(logits)
 
 # Step 52 - init_encoder_layer_parameters (not yet solved)
 # TODO: implement
