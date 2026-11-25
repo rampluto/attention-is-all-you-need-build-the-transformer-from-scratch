@@ -661,8 +661,30 @@ def init_decoder_layer_parameters(d_model, num_heads, d_ff):
         "ffn_beta": zeros(d_model)
     }
 
-# Step 54 - init_embedding_and_projection_parameters (not yet solved)
-# TODO: implement
+# Step 54 - init_embedding_and_projection_parameters
+import torch
+import math
+
+def init_embedding_and_projection_parameters(vocab_size, d_model, tie_weights=True):
+
+    def init_weight():
+        bound = math.sqrt(6.0 / (vocab_size + d_model))
+        return (
+            torch.empty(vocab_size, d_model, dtype=torch.float32)
+            .uniform_(-bound, bound)
+            .requires_grad_(True)
+        )
+
+    src_embedding = init_weight()
+    tgt_embedding = init_weight()
+
+    output_projection = tgt_embedding if tie_weights else init_weight()
+
+    return {
+        "src_embedding": src_embedding,
+        "tgt_embedding": tgt_embedding,
+        "output_projection": output_projection
+    }
 
 # Step 55 - collect_model_parameters_into_list (not yet solved)
 # TODO: implement
