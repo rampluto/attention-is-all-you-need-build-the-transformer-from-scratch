@@ -711,8 +711,25 @@ def collect_model_parameters_into_list(
 
     return model_params_list
 
-# Step 56 - shift_targets_right_with_start_token (not yet solved)
-# TODO: implement
+# Step 56 - shift_targets_right_with_start_token
+import torch
+
+def shift_targets_right_with_start_token(target_ids, start_token_id):
+    batch, tgt_seq = target_ids.shape
+
+    shifted_tgt_seqs = [[0 for _ in range(tgt_seq)] for _ in range(batch)]
+
+    for i in range(batch):
+        shifted_tgt_seqs[i][0] = start_token_id
+
+        for j in range(1, tgt_seq):
+            shifted_tgt_seqs[i][j] = target_ids[i][j - 1].item()
+
+    return torch.tensor(
+        shifted_tgt_seqs,
+        dtype=target_ids.dtype,
+        device=target_ids.device
+    )
 
 # Step 57 - compute_noam_learning_rate (not yet solved)
 # TODO: implement
