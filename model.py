@@ -572,8 +572,48 @@ def run_transformer_forward(src_ids, tgt_ids, model_params, num_heads, pad_id):
     # 10. Convert logits to log probabilities
     return apply_log_softmax_over_vocab(logits)
 
-# Step 52 - init_encoder_layer_parameters (not yet solved)
-# TODO: implement
+# Step 52 - init_encoder_layer_parameters
+import torch
+import math
+
+def init_encoder_layer_parameters(d_model, num_heads, d_ff):
+    """Return a dict of leaf tensors with requires_grad=True for one encoder layer."""
+
+    def init_weight(fan_in, fan_out):
+        bound = math.sqrt(6.0 / (fan_in + fan_out))
+        return (
+            torch.empty(fan_in, fan_out, dtype=torch.float32)
+            .uniform_(-bound, bound)
+            .requires_grad_(True)
+        )
+
+    def zeros(size):
+        return torch.zeros(size, dtype=torch.float32, requires_grad=True)
+
+    def ones(size):
+        return torch.ones(size, dtype=torch.float32, requires_grad=True)
+
+    return {
+        # Self-attention projections
+        "w_q": init_weight(d_model, d_model),
+        "w_k": init_weight(d_model, d_model),
+        "w_v": init_weight(d_model, d_model),
+        "w_o": init_weight(d_model, d_model),
+
+        # Feed-forward network
+        "w1": init_weight(d_model, d_ff),
+        "b1": zeros(d_ff),
+        "w2": init_weight(d_ff, d_model),
+        "b2": zeros(d_model),
+
+        # Self-attention LayerNorm
+        "attn_gamma": ones(d_model),
+        "attn_beta": zeros(d_model),
+
+        # Feed-forward LayerNorm
+        "ffn_gamma": ones(d_model),
+        "ffn_beta": zeros(d_model)
+    }
 
 # Step 53 - init_decoder_layer_parameters (not yet solved)
 # TODO: implement
